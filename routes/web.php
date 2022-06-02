@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Cache;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,55 +14,58 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/{int1}+{int2}', function ($slug1, $slug2) {
+Route::get('/{NumberOne}_{NumberTwo}_{Tool?}', function ($slug1, $slug2,$slugx=null) {
 
+
+   
     
-    $summing_result = cache()->remember(".summing_result", 10, function() use ($slug1, $slug2){
+    $result = Cache::remember("{$slug1}_{$slug2}_{$slugx}", 10 ,function () use ($slug1, $slug2, $slugx)
+    {
         var_dump('calculated');
-        return $slug1 + $slug2;
-    });
 
-    return view('/summing_result', [
-        'summing_result' => $summing_result,
-        'slug1' =>$slug1,
-        'slug2' => $slug2
-    ]);
-});
+         switch ($slugx){
 
-
-Route::get('/{int3}_{int4}_{opt}', function ($slug3, $slug4, $slugx) {
-
-    
-    $result = cache()->remember(".summing_result", 10, function() use ($slug3, $slug4,$slugx){
-        var_dump('calculated');
-        switch ($slugx){
             case "add";
-                return $slug3 + $slug4;
-                $slugx = "adding";
+            case null;
+                return $slug1 + $slug2;    
                 break;
 
             case "sub";
-                return $slug3 - $slug4;
-                $slugx = "subtracting";
+                return $slug1 - $slug2;
                 break;
+
             case "mul";
-                return $slug3 * $slug4;
-                $slugx = "multiplication";
+                return $slug1 * $slug2;
                 break;
+
             case "div";
-                if ($slug4 == 0){
-                abort("cannot divide by zero");
-                } else return $slug3/$slug4;
-                $slugx = "division";
+                if ($slug2 == 0){
+                   abort(500, "cannot divide by zero");
+                } else return $slug1/$slug2;
                 break;
-        };
-        
+        }
     });
+
+    
+
+
+    $actions = [
+        null => 'adding',
+        'add' => 'adding',
+        'sub' => 'subtracting',
+        'div' => 'division',
+        'mul' => 'multiplication'
+    ];
+
+
 
     return view('/additional_assigment', [
         'result' => $result,
-        'slug3' =>$slug3,
-        'slug4' => $slug4,
-        'slugx'=> $slugx
+        'slug1' => $slug1,
+        'slug2' => $slug2,
+        'slugx'=> $actions[$slugx]
     ]);
-});
+})->whereNumber(['NumberOne','NumberTwo'])->whereAlpha('Tool');
+
+
+
