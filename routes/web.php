@@ -1,7 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,40 +15,32 @@ use Illuminate\Support\Facades\Cache;
 |
 */
 
-Route::get('/{NumberOne}_{NumberTwo}_{Tool?}', function ($slug1, $slug2,$slugx=null) {
+Route::get('/test', function () {
+    $testParam = "Облaко яндекс";
+    return Str::slug($testParam);
+});
+
+Route::get('/{NumberOne}_{NumberTwo}_{Tool?}', function ($slug1, $slug2, $slugs = null) {
 
 
-   
-    
-    $result = Cache::remember("{$slug1}_{$slug2}_{$slugx}", 10 ,function () use ($slug1, $slug2, $slugx)
-    {
-        var_dump('calculated');
+    $result = Cache::remember("{$slug1}_{$slug2}_{$slugs}", 10, function () use ($slug1, $slug2, $slugs) {
 
-         switch ($slugx){
-
-            case "add";
-            case null;
-                return $slug1 + $slug2;    
-                break;
-
+        switch ($slugs) {
             case "sub";
                 return $slug1 - $slug2;
-                break;
-
             case "mul";
                 return $slug1 * $slug2;
-                break;
-
             case "div";
-                if ($slug2 == 0){
-                   abort(500, "cannot divide by zero");
-                } else return $slug1/$slug2;
-                break;
+                if ($slug2 === 0) {
+                    abort(500, "cannot divide by zero");
+                } else {
+                    return $slug1 / $slug2;
+                }
+            default:
+                return $slug1 + $slug2;
+
         }
     });
-
-    
-
 
     $actions = [
         null => 'adding',
@@ -58,14 +51,14 @@ Route::get('/{NumberOne}_{NumberTwo}_{Tool?}', function ($slug1, $slug2,$slugx=n
     ];
 
 
-
     return view('/additional_assigment', [
         'result' => $result,
         'slug1' => $slug1,
         'slug2' => $slug2,
-        'slugx'=> $actions[$slugx]
+        'slugs' => $actions[$slugs]
     ]);
-})->whereNumber(['NumberOne','NumberTwo'])->whereAlpha('Tool');
+})->
+whereNumber(['NumberOne', 'NumberTwo'])->whereAlpha('Tool');
 
 
 
